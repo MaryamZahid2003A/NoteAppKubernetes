@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lamp-web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: lamp-web
+  template:
+    metadata:
+      labels:
+        app: lamp-web
+    spec:
+      containers:
+        - name: lamp-web
+          image: yourdockerhubusername/lamp-note-app:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: DB_HOST
+              value: mysql-service
+            - name: DB_USER
+              value: root
+            - name: DB_PASS
+              value: root
+            - name: DB_NAME
+              value: notesdb

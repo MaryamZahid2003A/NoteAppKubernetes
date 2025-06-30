@@ -1,5 +1,5 @@
 <?php
-$servername = "db"; // service name in docker-compose
+$servername = "mysql-service"; // service name in docker-compose
 $username = "root";
 $password = "rootpassword";
 $dbname = "task_manager";
