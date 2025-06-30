@@ -1,0 +1,22 @@
+services:
+  web:
+    build: .
+    container_name: taskmanager_web
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    container_name: taskmanager_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: task_manager
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  db_data:

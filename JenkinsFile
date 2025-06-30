@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    environment {
+        COMPOSE_PROJECT_NAME = 'taskmanager_ci'
+        COMPOSE_FILE = 'docker-compose.yml'
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: 'main', url: 'https://github.com/MaryamZahid2003A/Testing.git'
+            }
+        }
+
+        stage('Build and Start Containers') {
+            steps {
+                script {
+                    echo "🛠️ Shutting down old containers (if any)..."
+                    sh "docker-compose -p ${COMPOSE_PROJECT_NAME} -f ${COMPOSE_FILE} down || true"
+
+                    echo "🔧 Building containers..."
+                    sh "docker-compose -p ${COMPOSE_PROJECT_NAME} -f ${COMPOSE_FILE} build --no-cache"
+
+                    echo "🚀 Starting containers..."
+                    sh "docker-compose -p ${COMPOSE_PROJECT_NAME} -f ${COMPOSE_FILE} up -d --remove-orphans"
+
+                    echo "⏳ Waiting for DB to initialize..."
+                    sh "sleep 15"  // Increase if DB takes longer
+                }
+            }
+        }
+
+        stage('Run Python Tests') {
+            steps {
+                script {
+                    echo "🧪 Running unit tests inside 'web' container..."
+                    sh "docker exec taskmanager_web python3 -m unittest discover -s tests -p 'test_*.py' -v"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ All tests passed successfully!'
+        }
+        failure {
+            echo '❌ Tests failed. Check logs for more details.'
+        }
+    }
+}
